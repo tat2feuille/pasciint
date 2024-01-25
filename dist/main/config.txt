@@ -1,0 +1,15 @@
+INSERT LINE
+up=z
+down=s
+right=d
+left=q
+
+EDIT CELL
+altform=a
+bold=e
+double=r
+
+SPECIAL COMMANDS
+copy=c
+paste=v
+save=p
