@@ -17,7 +17,7 @@ for e in f:
 version=open("version.txt").read()
 window = tk.Tk()
 window.title("Pasciint - {}".format(version))
-window.iconbitmap('icon.ico')
+#window.iconbitmap('icon.ico')
 bu = tk.font.Font(family='consolas', size=40)
 size = 10
 char=[[tk.Label(window,text=" ",background='white',height=1,width=1,padx=0,pady=0,font=bu,bd=0) for y in range(1+size*2)] for x in range(1+size)]
@@ -27,6 +27,7 @@ for y in range(len(char)):
 char[size//2][size].configure(background='yellow')
 xn=0
 yn=0
+insert=True
 def refresh():
     for y in char:
         for x in y:
@@ -96,19 +97,79 @@ def save():
     f=open("save.txt","wb")
     f.write(s.encode())
     f.close()
-            
+def change_color(c):
+    char[size//2][size].configure(background=c)
+def key_handler(event):
+    global insert,elements,xn,yn
+    print(event)
+    print(insert)
+    char = event.char
+    if event.char=="\r":
+        insert=not insert
+        if insert:
+            change_color('yellow')
+        else:
+            change_color('lime')
+        return None
+    if insert:
+        print(config)
+        if char.lower() in config.values():
+            change(next((k for k, v in config.items() if v == char.lower()), None))
+        return None
+    # Get the character typed
+    print(char)
+    if char=="\x08":
+        try:
+            del elements[(xn-1,yn)]
+        except KeyError:
+            pass
+        updated_dict = {}
+        for (x, y), value in elements.items():
+            if y == yn and x>=xn:
+                updated_dict[(x - 1, y)] = value  # Increase x by 1
+            else:
+                updated_dict[(x, y)] = value  # Keep other keys unchange
+        elements=updated_dict
+        move(-1,0)
+    elif char=="\x7f":
+        try:
+            del elements[(xn,yn)]
+        except KeyError:
+            pass
+        updated_dict = {}
+        for (x, y), value in elements.items():
+            if y == yn and x>xn:
+                updated_dict[(x - 1, y)] = value  # Increase x by 1
+            else:
+                updated_dict[(x, y)] = value  # Keep other keys unchange
+        elements=updated_dict
+        move(-1,0)
+    elif char:  # Check if a character is present
+
+        updated_dict = {}
+        for (x, y), value in elements.items():
+            if y == yn and x>=xn:
+                updated_dict[(x + 1, y)] = value  # Increase x by 1
+            else:
+                updated_dict[(x, y)] = value  # Keep other keys unchange
+        elements=updated_dict
+        elements[(xn,yn)]=str(char)
+        move(1,0)
+    refresh()
 window.bind("<Up>",lambda event:move(0,-1))
 window.bind("<Down>",lambda event:move(0,1))
 window.bind("<Right>",lambda event:move(1,0))
 window.bind("<Left>",lambda event:move(-1,0))
-window.bind("<Key-{}>".format(config['right']),lambda event:change('right'))
-window.bind("<Key-{}>".format(config['left']),lambda event:change('left'))
-window.bind("<Key-{}>".format(config['up']),lambda event:change('up'))
-window.bind("<Key-{}>".format(config['down']),lambda event:change('down'))
-window.bind("<Key-{}>".format(config['altform']),lambda event:change('alt'))
-window.bind("<Key-{}>".format(config['bold']),lambda event:change('bold'))
-window.bind("<Key-{}>".format(config['double']),lambda event:change('double'))
-window.bind("<Key-{}>".format(config['copy']),lambda event:change('copy'))
-window.bind("<Key-{}>".format(config['paste']),lambda event:change('paste'))
-window.bind("<Key-{}>".format(config['save']),lambda event:save())
+window.bind("<Enter>",lambda event:change('insert'))
+window.bind("<Key>",key_handler)
+#window.bind("<Key-{}>".format(config['right']),lambda event:change('right'))
+#window.bind("<Key-{}>".format(config['left']),lambda event:change('left'))
+#window.bind("<Key-{}>".format(config['up']),lambda event:change('up'))
+#window.bind("<Key-{}>".format(config['down']),lambda event:change('down'))
+#window.bind("<Key-{}>".format(config['altform']),lambda event:change('alt'))
+#window.bind("<Key-{}>".format(config['bold']),lambda event:change('bold'))
+#window.bind("<Key-{}>".format(config['double']),lambda event:change('double'))
+#window.bind("<Key-{}>".format(config['copy']),lambda event:change('copy'))
+#window.bind("<Key-{}>".format(config['paste']),lambda event:change('paste'))
+#window.bind("<Key-{}>".format(config['save']),lambda event:save())
 window.mainloop()
