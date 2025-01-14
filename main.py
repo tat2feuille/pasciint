@@ -8,6 +8,7 @@ dDown = {' ': '╷', '─': '┬', '━': '┯', '│': '╵', '┃': '╹', '�
 elements = {}
 import tkinter as tk
 import tkinter.font
+import pickle
 f=open("config.txt").read().split("\n")
 config={}
 for e in f:
@@ -60,7 +61,7 @@ def change(what):
         elements[(xn,yn)]=dUp[e]
     elif what=="down":
         elements[(xn,yn)]=dDown[e]
-    elif what=="alt":
+    elif what=="altform":
         elements[(xn,yn)]=dA[e]
     elif what=="bold":
         elements[(xn,yn)]=dB[e]
@@ -71,8 +72,22 @@ def change(what):
         clipboard=e
     elif what=="paste":
         elements[(xn,yn)]=clipboard
+    elif what=="export":
+        export()
+    elif what=="save":
+        save()
+    elif what=="load":
+        load()
     refresh()
 def save():
+    global elements
+    pickle.dump(elements,open("save.pickle",'wb'))
+    refresh()
+def load():
+    global elements
+    elements=pickle.load(open("save.pickle",'rb'))
+    refresh()
+def export():
     r=elements.items()
     mini=[99999,9999]
     maxi=[-9999999,-999999]
@@ -94,7 +109,7 @@ def save():
                 e=" "
             s+=e
         s+="\n"
-    f=open("save.txt","wb")
+    f=open("export.txt","wb")
     f.write(s.encode())
     f.close()
 def change_color(c):
